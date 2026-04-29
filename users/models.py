@@ -5,7 +5,7 @@ from .managers import CustomUserManager
 
 class CustomUser(AbstractUser):
     """
-    Custom user model for SavingsManagerWeb.
+    Custom user model for saving_manager_web.
     Using email as the primary identifier instead of username.
     """
     username = None
