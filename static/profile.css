@@ -77,3 +77,20 @@
     padding: 0;
     list-style: none;
 }
+
+/* action messages */
+.messages {
+    margin-bottom: 16px;
+}
+
+.message {
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 8px;
+}
+
+.message.success {
+    background-color: #e6ffed;
+    color: #2e7d32;
+    border: 1px solid #b7ebc6;
+}
