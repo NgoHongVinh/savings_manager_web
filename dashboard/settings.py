@@ -46,7 +46,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django-browser-reload',
+    'django_browser_reload',
     
     # Custom Apps
     'users',
@@ -66,7 +66,8 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    "allauth.account.middleware.AccountMiddleware",
+    'allauth.account.middleware.AccountMiddleware',
+    'django_browser_reload.middleware.BrowserReloadMiddleware'
 ]
 
 ROOT_URLCONF = 'dashboard.urls'
