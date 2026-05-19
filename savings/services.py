@@ -1,7 +1,9 @@
 from django.db import transaction
 from decimal import Decimal
 from datetime import date
-
+from django.db.models import Sum
+from django.utils.timezone import now
+from savings.models import Transaction
 from django.db.models import QuerySet
 from django.utils.timezone import now
 
@@ -208,3 +210,27 @@ def change_saving_type_rate(saving_type: SavingType, new_rate: Decimal, effectiv
 
 def close_account(account: SavingAccount):
     return account.delete()
+
+def get_statistics_by_date(date, account):
+
+    qs = Transaction.objects.filter(
+        timestamp__date=date,
+        account=account
+    )
+
+    total_income = qs.filter(
+        transaction_type__in=["OPEN", "DEPOSIT"]
+    ).aggregate(total=Sum("amount"))["total"] or Decimal("0")
+
+    total_expense = qs.filter(
+        transaction_type__in=["WITHDRAW", "CLOSE"]
+    ).aggregate(total=Sum("amount"))["total"] or Decimal("0")
+
+    return {
+        "date": date,
+        "account_number": account.account_number,
+        "account_name": account.name,
+        "total_income": total_income,
+        "total_expense": total_expense,
+        "difference": total_income - total_expense
+    }

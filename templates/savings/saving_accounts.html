@@ -1,5 +1,5 @@
-{% load static %}
 {% extends "base.html" %}
+{% load static %}
 
 {% block title %}Savings{% endblock %}
 {% block extra_css %}
@@ -16,6 +16,7 @@
 {% endif %}
 
 <div class="grid">
+
   <section class="card">
     <h3>Create Saving Account</h3>
     <form method="post">
@@ -45,7 +46,35 @@
       <button type="submit">Withdraw</button>
     </form>
   </section>
+
 </div>
+
+<section class="card">
+  <h3>Daily Report</h3>
+
+  <form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="form_type" value="statistics">
+
+    {{ report_form.account }}
+    {{ report_form.date }}
+
+    <button type="submit">Generate Report</button>
+  </form>
+
+  {% if statistics %}
+  <div class="report-box">
+    <h4>Account: {{ statistics.account_number }}</h4>
+
+    <p><b>Name:</b> {{ statistics.account_name }}</p>
+    <p><b>Date:</b> {{ statistics.date }}</p>
+
+    <p style="color:green;">Income: {{ statistics.total_income }}</p>
+    <p style="color:red;">Expense: {{ statistics.total_expense }}</p>
+    <p style="color:blue;">Difference: {{ statistics.difference }}</p>
+  </div>
+  {% endif %}
+</section>
 
 <section class="card">
   <h3>Saving Types</h3>
