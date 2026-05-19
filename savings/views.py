@@ -18,7 +18,7 @@ from savings.services import (
     deposit_to_account,
     get_account_by_user,
     withdraw_from_account,
-    get_statistics_by_date,
+    get_statistics,
 )
 
 
@@ -84,10 +84,20 @@ def saving_accounts(request):
 
                 if report_form.is_valid():
 
-                    date = report_form.cleaned_data["date"]
+                    period_type = report_form.cleaned_data["period_type"]
                     account = report_form.cleaned_data["account"]
+                    date = report_form.cleaned_data.get("date")
 
-                    statistics = get_statistics_by_date(date, account)
+                    month = request.POST.get("month")
+                    year = request.POST.get("year")
+
+                    statistics = get_statistics(
+                        period_type,
+                        date,
+                        account,
+                        month,
+                        year
+                    )
 
                     messages.success(request, "Report generated successfully.")
 
