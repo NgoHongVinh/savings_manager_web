@@ -116,6 +116,10 @@ EMAIL_BACKEND = "django.core.mail.backends.console.EmailBackend"
 DEFAULT_FROM_EMAIL = "noreply@murasaki.id.vn"
 ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 1
 
+ACCOUNT_FORMS = {
+    'signup': 'users.forms.CustomSignupForm',
+}
+
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
