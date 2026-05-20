@@ -1,5 +1,6 @@
 from django.db import models
 from django.conf import settings
+from django.utils import timezone
 from django.utils.timezone import now
 import random
 
@@ -76,6 +77,8 @@ class SavingAccount(models.Model):
     address = models.CharField(max_length=100)
     balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     created_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+    deactivated_at = models.DateTimeField(null=True, blank=True)
 
     interest_rate = models.DecimalField(max_digits=5, decimal_places=4) # snapshot
     start_date = models.DateField(auto_now_add=True) # lazy evaluation
@@ -96,26 +99,29 @@ class SavingAccount(models.Model):
         self.balance -= amount
         self.save()
 
+    def delete(self, *args, **kwargs):
+        # soft delete the account
+        self.is_active = False
+        self.deleted_at = timezone.now()
+        self.save()
+
     def __str__(self):
         return f"{self.account_number} - {self.name}"
 
-class Transaction(models.Model):
-    TRANSACTION_TYPES = [
-        ('OPEN', 'Account Opening'),
-        ('DEPOSIT', 'Deposit'),
-        ('WITHDRAW', 'Withdrawal'),
-        ('CLOSE', 'Account Closing'),
-    ]
+class TransactionType(models.TextChoices):
+    OPEN = "OPEN", "Account Opening"
+    DEPOSIT = "DEPOSIT", "Deposit"
+    WITHDRAW = "WITHDRAW", "Withdrawal"
+    CLOSE = "CLOSE", "Account Closing"
 
-    account_number = models.CharField(max_length=10)
-    name = models.CharField(max_length=50)  # transaction maker's name
-    transaction_type = models.CharField(max_length=10, choices=TRANSACTION_TYPES)
+class Transaction(models.Model):
+    transaction_type = models.CharField(max_length=10, choices=TransactionType)
     balance_before = models.DecimalField(max_digits=12, decimal_places=2)
     amount = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
     balance_after = models.DecimalField(max_digits=12, decimal_places=2)
     timestamp = models.DateTimeField(auto_now_add=True)
 
-    account = models.ForeignKey(SavingAccount, null=True, on_delete=models.SET_NULL, related_name='transactions')
+    account = models.ForeignKey(SavingAccount, on_delete=models.PROTECT, related_name='transactions')
 
     def __str__(self):  
         return f"{self.transaction_type}: {self.amount} on {self.timestamp}"
