@@ -1,8 +1,8 @@
 from django.contrib.sessions.backends.base import SessionBase
-from django.forms import Form
+from django.forms import BaseForm
 from django.forms.utils import ErrorDict, ErrorList
 
-def read_session_errors(form: Form, session: SessionBase, error_key: str):
+def read_session_errors(form: BaseForm, session: SessionBase, error_key: str):
     errors = session.pop(error_key, None)
     if errors:
         form._errors = ErrorDict({
