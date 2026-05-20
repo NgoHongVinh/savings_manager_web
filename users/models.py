@@ -10,9 +10,9 @@ class CustomUser(AbstractUser):
     """
     username = None
     email = models.EmailField(_('email address'), unique=True)
-    full_name = models.CharField(max_length=50)
-    citizen_id = models.CharField(max_length=12)
-    address = models.CharField(max_length=100)
+    full_name = models.CharField(max_length=50, default="")
+    citizen_id = models.CharField(max_length=12, default="", unique=True)
+    address = models.CharField(max_length=100, default="")
 
     USERNAME_FIELD = 'email'
     REQUIRED_FIELDS = []
