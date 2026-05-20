@@ -8,7 +8,7 @@ from savings.forms import (
     CreateSavingAccountForm,
     DepositForm,
     WithdrawForm,
-    DailyReportForm,
+    ReportForm,
 )
 
 from savings.models import SavingType
@@ -24,21 +24,18 @@ from savings.services import (
 
 @login_required
 def saving_accounts(request):
-
     accounts = get_account_by_user(request.user)
     saving_types = SavingType.objects.filter(is_active=True).order_by("name")
     create_form = CreateSavingAccountForm(prefix="create")
     deposit_form = DepositForm(prefix="deposit", accounts_qs=accounts)
     withdraw_form = WithdrawForm(prefix="withdraw", accounts_qs=accounts)
 
-    report_form = DailyReportForm(accounts_qs=accounts)
+    report_form = ReportForm(accounts_qs=accounts)
     statistics = None
 
     if request.method == "POST":
         form_type = request.POST.get("form_type")
-
         try:
-
             if form_type == "create":
                 create_form = CreateSavingAccountForm(request.POST, prefix="create")
 
@@ -80,7 +77,7 @@ def saving_accounts(request):
 
             elif form_type == "statistics":
 
-                report_form = DailyReportForm(request.POST, accounts_qs=accounts)
+                report_form = ReportForm(request.POST, accounts_qs=accounts)
 
                 if report_form.is_valid():
 
