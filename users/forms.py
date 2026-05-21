@@ -2,7 +2,6 @@ from allauth.account.forms import SignupForm
 from django import forms
 from .models import Customer
 
-
 class CustomSignupForm(SignupForm):
     full_name = forms.CharField(max_length=50)
     citizen_id = forms.CharField(max_length=12)
@@ -11,11 +10,12 @@ class CustomSignupForm(SignupForm):
     def save(self, request):
         user = super().save(request)
 
-        user.full_name = self.cleaned_data["full_name"]
-        user.citizen_id = self.cleaned_data["citizen_id"]
-        user.address = self.cleaned_data["address"]
-
-        user.save()
+        Customer.objects.create(
+            user=user,
+            full_name=self.cleaned_data["full_name"],
+            citizen_id=self.cleaned_data["citizen_id"],
+            address=self.cleaned_data["address"],
+        )
 
         return user
 
