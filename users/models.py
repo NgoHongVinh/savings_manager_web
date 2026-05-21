@@ -11,6 +11,18 @@ class CustomUser(AbstractUser):
     """
     username = None
     email = models.EmailField(_('email address'), unique=True)
+
+    USERNAME_FIELD = 'email'
+    REQUIRED_FIELDS = []
+
+    objects = CustomUserManager()
+
+    def __str__(self):
+        return self.email
+
+class Customer(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="customer")
+
     full_name = models.CharField(max_length=50, default="")
     citizen_id = models.CharField(
         max_length=12,
@@ -24,10 +36,8 @@ class CustomUser(AbstractUser):
     )
     address = models.CharField(max_length=100, default="")
 
-    USERNAME_FIELD = 'email'
-    REQUIRED_FIELDS = []
+class Employee(models.Model):
+    user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="employee")
 
-    objects = CustomUserManager()
-
-    def __str__(self):
-        return self.email
+    role = models.CharField(max_length=30)
+    branch = models.CharField(max_length=50)

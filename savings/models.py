@@ -4,6 +4,9 @@ from django.utils import timezone
 from django.utils.timezone import now
 import random
 
+from users.models import Customer
+
+
 def generate_account_number():
     """Generates a random 10-digit account number."""
     return "".join([str(random.randint(0, 9)) for _ in range(10)])
@@ -84,7 +87,7 @@ class SavingAccount(models.Model):
     interest_last_applied_on = models.DateField(null=True, blank=True)
 
     saving_type = models.ForeignKey(SavingType, on_delete=models.PROTECT, related_name="accounts")
-    user = models.ForeignKey(settings.AUTH_USER_MODEL, null=True, on_delete=models.SET_NULL, related_name='saving_accounts')
+    user = models.ForeignKey(Customer, null=True, on_delete=models.SET_NULL, related_name='saving_accounts')
 
     def deposit(self, amount):
         self.balance += amount

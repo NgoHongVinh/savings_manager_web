@@ -1,18 +1,18 @@
-from django.contrib.auth.decorators import login_required
 from django.shortcuts import render, redirect
 from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
 from users.forms import InformationChangeForm, EmailChangeForm
 from django.contrib import messages
 
+from .decorators import customer_required
 from .utils import read_session_errors
 
-@login_required
+@customer_required
 def profile(request):
     if request.method == "POST":
         match request.POST.get("form_type"):
             case "information":
-                information_form = InformationChangeForm(request.POST, instance=request.user)
+                information_form = InformationChangeForm(request.POST, instance=request.user.customer)
                 if information_form.is_valid():
                     information_form.save()
                     messages.success(request, "Information updated successfully.")
@@ -39,7 +39,7 @@ def profile(request):
         return redirect("profile")
 
     else:
-        information_form = InformationChangeForm(instance=request.user)
+        information_form = InformationChangeForm(instance=request.user.customer)
         password_form = PasswordChangeForm(request.user)
         email_form = EmailChangeForm(user=request.user)
 

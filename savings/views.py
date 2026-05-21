@@ -4,6 +4,7 @@ from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import redirect, render
 
+from dashboard.decorators import customer_required
 from savings.forms import (
     CreateSavingAccountForm,
     DepositForm,
@@ -22,7 +23,7 @@ from savings.services import (
 )
 
 
-@login_required
+@customer_required
 def saving_accounts(request):
     accounts = get_account_by_user(request.user)
     saving_types = SavingType.objects.filter(is_active=True).order_by("name")

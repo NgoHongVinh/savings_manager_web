@@ -1,6 +1,7 @@
 from allauth.account.forms import SignupForm
 from django import forms
-from .models import CustomUser
+from .models import Customer
+
 
 class CustomSignupForm(SignupForm):
     full_name = forms.CharField(max_length=50)
@@ -20,7 +21,7 @@ class CustomSignupForm(SignupForm):
 
 class InformationChangeForm(forms.ModelForm):
     class Meta:
-        model = CustomUser
+        model = Customer
         fields = [
             "full_name",
             "citizen_id",
