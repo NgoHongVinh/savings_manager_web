@@ -56,7 +56,6 @@ INSTALLED_APPS = [
     # Auth
     'allauth',
     'allauth.account',
-    'employees.apps.EmployeeConfig'
 ]
 
 MIDDLEWARE = [
