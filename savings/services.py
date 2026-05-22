@@ -26,7 +26,7 @@ def create_account(
         name: str, citizen_id: str, address: str, balance: Decimal,
         user: CustomUser, saving_type: SavingType
 ) -> SavingPlan:
-    min_initial_deposit = Decimal(get_parameter("min_initial_deposit"))
+    min_initial_deposit = Decimal(get_parameter("min_initial_deposit", 1_000_000))
     if balance < min_initial_deposit:
         raise ValueError(f"Minimum balance is {min_initial_deposit:,.0f}")
 
@@ -54,7 +54,7 @@ def get_account_by_citizen_id(citizen_id: str) -> QuerySet[SavingPlan, SavingPla
     return SavingPlan.objects.filter(citizen_id=citizen_id)
 
 def deposit_to_account(account: SavingPlan, amount: Decimal):
-    minimum_deposit = Decimal(get_parameter("min_additional_deposit"))
+    minimum_deposit = Decimal(get_parameter("min_additional_deposit", 100_000))
     if amount < minimum_deposit:
         raise ValueError(
             f"Minimum deposit is {minimum_deposit:,.0f}"
