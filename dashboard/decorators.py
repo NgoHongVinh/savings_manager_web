@@ -6,7 +6,7 @@ def customer_required(view_func):
             return redirect("/login")
 
         if not request.user.is_customer:
-            return redirect("/admin")
+            return redirect("/employees")
 
         return view_func(request, *args, **kwargs)
 
