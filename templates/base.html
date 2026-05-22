@@ -25,7 +25,7 @@
                         <a href="#">Profile</a>
                         <a href="{% url 'account_logout' %}">Logout</a>
                         {% if user.is_employee %}
-                        <a href="{% url 'employee_index' %}">Employee Page</a>
+                        <a href="{% url 'employee_dashboard' %}">Employee Page</a>
                         {% endif %}
                     </div>
                 </div>

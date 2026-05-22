@@ -1,13 +1,16 @@
 from django.shortcuts import render
 
-def employee_index(request):
+def employee_dashboard(request):
     pass
 
-def employee_users(request):
+def manage_customer(request):
     pass
 
-def employee_savings(request):
+def manage_staffs(request):
     pass
 
-def employee_transactions(request):
+def manage_saving_accounts(request):
+    pass
+
+def manage_transactions(request):
     pass
