@@ -3,7 +3,9 @@ from decimal import Decimal
 from datetime import date
 from django.db.models import Sum
 from django.utils.timezone import now
-from savings.models import Transaction
+
+from dashboard.utils import get_parameter
+from savings.models import Transaction, Parameter
 from django.db.models import QuerySet
 from django.utils.timezone import now
 
@@ -24,8 +26,9 @@ def create_account(
         name: str, citizen_id: str, address: str, balance: Decimal,
         user: CustomUser, saving_type: SavingType
 ) -> SavingPlan:
-    if balance < 1_000_000:
-        raise ValueError("Minimum balance is 1,000,000")
+    min_initial_deposit = Decimal(get_parameter("min_initial_deposit"))
+    if balance < min_initial_deposit:
+        raise ValueError(f"Minimum balance is {min_initial_deposit:,.0f}")
 
     maturity_date = None
     if not saving_type.is_flexible and saving_type.duration_months:
@@ -51,10 +54,11 @@ def get_account_by_citizen_id(citizen_id: str) -> QuerySet[SavingPlan, SavingPla
     return SavingPlan.objects.filter(citizen_id=citizen_id)
 
 def deposit_to_account(account: SavingPlan, amount: Decimal):
-    # only allow deposit at maturity date (fixed-term only)
-
-    if amount < Decimal("100000"):
-        raise ValueError("Minimum deposit is 100,000")
+    minimum_deposit = Decimal(get_parameter("min_additional_deposit"))
+    if amount < minimum_deposit:
+        raise ValueError(
+            f"Minimum deposit is {minimum_deposit:,.0f}"
+        )
 
     with transaction.atomic():
         account.refresh_from_db()

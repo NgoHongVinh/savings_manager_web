@@ -109,3 +109,7 @@ class Transaction(models.Model):
     timestamp = models.DateTimeField(auto_now_add=True)
 
     saving_plan = models.ForeignKey(SavingPlan, on_delete=models.PROTECT, related_name='transactions')
+
+class Parameter(models.Model):
+    key = models.CharField(max_length=100, unique=True)
+    value = models.CharField(max_length=255)
