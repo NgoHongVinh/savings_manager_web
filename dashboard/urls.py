@@ -20,7 +20,7 @@ from . import views
 urlpatterns = [
     path("__reload__/", include("django_browser_reload.urls")),
     path('', views.profile, name="profile"),
-    path('', include('savings.urls')),
     path('', include('allauth.urls')),
-    path('', include('employees.urls')),
+    path('savings/', include('savings.urls')),
+    path('employees/', include('employees.urls')),
 ]
