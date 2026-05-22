@@ -45,8 +45,8 @@ class Customer(models.Model):
     address = models.CharField(max_length=100, default="")
 
 class EmployeeRole(models.TextChoices):
-    MANAGER = "MANAGER", "Manager"
-    ACCOUNTANT = "ACCOUNTANT", "Accountant"
+    READ = "READ", "Read Only"
+    WRITE = "WRITE", "Read & Write"
 
 class Employee(models.Model):
     user = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name="employee")
@@ -54,4 +54,4 @@ class Employee(models.Model):
 
     @property
     def can_edit(self):
-        return self.role == "write"
+        return self.role == EmployeeRole.WRITE
