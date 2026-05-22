@@ -1,0 +1,38 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Admin Page{% endblock %}</title>
+
+    <!-- Link CSS -->
+    <link rel="stylesheet" href="{% static 'admin/admin.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="topbar">
+        <div class="left-section">
+            <a href="{% url 'admin:index' %}" class="app-name">Admin Page</a>
+            <a href="{% url 'admin:users_customuser_changelist' %}" class="nav-button">Users</a>
+            <a href="{% url 'admin:savings_savingaccount_changelist' %}" class="nav-button">Savings</a>
+            <a href="{% url 'admin:savings_transaction_changelist' %}" class="nav-button">Transactions</a>
+        </div>
+
+        <div class="right-section">
+            <div class="user-menu">
+                <a href="#" class="nav-login">{{ user.email }}</a>
+
+                <div class="dropdown">
+                    <a href="#">Admin</a>
+                    <a href="{% url 'account_logout' %}">Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+</body>
+</html>
