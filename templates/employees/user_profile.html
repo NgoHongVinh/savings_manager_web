@@ -1,0 +1,85 @@
+{% extends "employees/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'employees/user_profile.css' %}">
+{% endblock %}
+
+{% block content %}
+<div class="user-layout">
+    <aside class="user-sidebar card">
+        <div class="avatar">
+            {{ user.email|first|upper }}
+        </div>
+        <h2>{{ user.email }}</h2>
+        <div class="badges">
+            {% if user.is_customer %}
+            <span class="badge">Customer</span>
+            {% endif %}
+
+            {% if user.is_employee %}
+            <span class="badge employee">
+                {{ user.employee.get_role_display }}
+            </span>
+            {% endif %}
+        </div>
+        <div class="sidebar-actions">
+            <a href="{% url 'manage_users' %}">← Back to Users</a>
+        </div>
+    </aside>
+
+    <div class="user-content">
+        <section class="card">
+            <div class="section-header">
+                <h3>User Information</h3>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="user">
+
+                {{ user_form.as_p }}
+
+                <div class="form-actions">
+                    <button type="submit">Save Changes</button>
+                </div>
+            </form>
+        </section>
+
+        {% if customer_form %}
+        <section class="card">
+            <div class="section-header">
+                <h3>Customer Information</h3>
+            </div>
+
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="customer">
+
+                {{ customer_form.as_p }}
+
+                <div class="form-actions">
+                    <button type="submit">Save Customer Information</button>
+                </div>
+            </form>
+        </section>
+        {% endif %}
+
+        <section class="card">
+            <div class="section-header">
+                <h3>Employee Access</h3>
+            </div>
+            <form method="post">
+                {% csrf_token %}
+                <input type="hidden" name="form_type" value="employee">
+
+                {{ employee_form.as_p }}
+
+                <div class="form-actions">
+                    <button type="submit" class="danger-button">Remove Employee Access</button>
+                    <button type="submit">Save Changes</button>
+                </div>
+            </form>
+        </section>
+    </div>
+</div>
+{% endblock %}

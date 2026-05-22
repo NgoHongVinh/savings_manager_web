@@ -1,11 +1,9 @@
 from django.db import models
-from django.conf import settings
 from django.utils import timezone
 from django.utils.timezone import now
 import random
 
 from users.models import Customer
-
 
 def generate_account_number():
     """Generates a random 10-digit account number."""
@@ -15,9 +13,9 @@ class SavingType(models.Model):
     name = models.CharField(max_length=50)
     duration_months = models.IntegerField(null=True, blank=True)  # 3, 6, 12
     interest_rate = models.DecimalField(max_digits=5, decimal_places=4) # 0.05, 0.1, 0.15
-    is_active = models.BooleanField(default=True)
-
     is_flexible = models.BooleanField(default=False)
+
+    is_active = models.BooleanField(default=True)
 
     def save(self, *args, **kwargs):
         # Track old rate so we can append a new history row when rate changes.
@@ -50,10 +48,6 @@ class SavingType(models.Model):
                 effective_to=None,
             )
 
-    def __str__(self):
-        return self.name
-
-
 class SavingTypeRateHistory(models.Model):
     # Keep a timeline of rates so flexible accounts can calculate past periods correctly.
     saving_type = models.ForeignKey(SavingType, on_delete=models.CASCADE, related_name="rate_history")
@@ -64,11 +58,7 @@ class SavingTypeRateHistory(models.Model):
     class Meta:
         ordering = ["effective_from"]
 
-    def __str__(self):
-        end = self.effective_to or "present"
-        return f"{self.saving_type.name}: {self.interest_rate}% ({self.effective_from} -> {end})"
-
-class SavingAccount(models.Model):
+class SavingPlan(models.Model):
     account_number = models.CharField(
         primary_key=True,
         max_length=10,
@@ -105,9 +95,6 @@ class SavingAccount(models.Model):
         self.deleted_at = timezone.now()
         self.save()
 
-    def __str__(self):
-        return f"{self.account_number} - {self.user.full_name}"
-
 class TransactionType(models.TextChoices):
     OPEN = "OPEN", "Account Opening"
     DEPOSIT = "DEPOSIT", "Deposit"
@@ -121,7 +108,4 @@ class Transaction(models.Model):
     balance_after = models.DecimalField(max_digits=12, decimal_places=2)
     timestamp = models.DateTimeField(auto_now_add=True)
 
-    account = models.ForeignKey(SavingAccount, on_delete=models.PROTECT, related_name='transactions')
-
-    def __str__(self):  
-        return f"{self.transaction_type}: {self.amount} on {self.timestamp}"
+    saving_plan = models.ForeignKey(SavingPlan, on_delete=models.PROTECT, related_name='transactions')

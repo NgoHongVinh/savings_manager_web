@@ -55,7 +55,7 @@ def saving_accounts(request):
                 deposit_form = DepositForm(request.POST, prefix="deposit", accounts_qs=accounts)
 
                 if deposit_form.is_valid():
-                    account = deposit_form.cleaned_data["account"]
+                    account = deposit_form.cleaned_data["saving_plan"]
                     deposit_to_account(account, deposit_form.cleaned_data["amount"])
                     messages.success(request, "Deposit completed.")
                     return redirect("saving_accounts")
@@ -64,7 +64,7 @@ def saving_accounts(request):
                 withdraw_form = WithdrawForm(request.POST, prefix="withdraw", accounts_qs=accounts)
 
                 if withdraw_form.is_valid():
-                    account = withdraw_form.cleaned_data["account"]
+                    account = withdraw_form.cleaned_data["saving_plan"]
                     amount = withdraw_form.cleaned_data.get("amount")
 
                     withdraw_from_account(
@@ -82,7 +82,7 @@ def saving_accounts(request):
                 if report_form.is_valid():
 
                     period_type = report_form.cleaned_data["period_type"]
-                    account = report_form.cleaned_data["account"]
+                    account = report_form.cleaned_data["saving_plan"]
                     date = report_form.cleaned_data.get("date")
 
                     month = request.POST.get("month")

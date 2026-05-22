@@ -18,7 +18,7 @@ def employee_required(view_func):
             return redirect("/login")
 
         if not request.user.is_employee:
-            return redirect("/profile")
+            return redirect("/")
 
         return view_func(request, *args, **kwargs)
 

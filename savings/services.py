@@ -7,7 +7,7 @@ from savings.models import Transaction
 from django.db.models import QuerySet
 from django.utils.timezone import now
 
-from savings.models import SavingAccount, SavingType, SavingTypeRateHistory, Transaction
+from savings.models import SavingPlan, SavingType, SavingTypeRateHistory, Transaction
 from users.models import CustomUser
 
 def _add_months(d: date, months: int) -> date:
@@ -18,12 +18,12 @@ def _add_months(d: date, months: int) -> date:
     return date(year, month, day)
 
 def get_all_accounts():
-    return SavingAccount.objects.all()
+    return SavingPlan.objects.all()
 
 def create_account(
         name: str, citizen_id: str, address: str, balance: Decimal,
         user: CustomUser, saving_type: SavingType
-) -> SavingAccount:
+) -> SavingPlan:
     if balance < 1_000_000:
         raise ValueError("Minimum balance is 1,000,000")
 
@@ -31,7 +31,7 @@ def create_account(
     if not saving_type.is_flexible and saving_type.duration_months:
         maturity_date = _add_months(now().date(), saving_type.duration_months)
 
-    account = SavingAccount.objects.create(
+    account = SavingPlan.objects.create(
         name=name, citizen_id=citizen_id, address=address, balance=balance,
         interest_rate=saving_type.interest_rate,
         # Start accrual tracking on account creation date for flexible accounts.
@@ -40,17 +40,17 @@ def create_account(
         saving_type=saving_type, user=user)
     return account
 
-def get_account_by_number(account_number: str) -> SavingAccount | None:
-    return SavingAccount.objects.get(account_number=account_number)
+def get_account_by_number(account_number: str) -> SavingPlan | None:
+    return SavingPlan.objects.get(account_number=account_number)
 
-def get_account_by_user(user: CustomUser) -> QuerySet[SavingAccount, SavingAccount]:
-    return SavingAccount.objects.filter(user=user)
+def get_account_by_user(user: CustomUser) -> QuerySet[SavingPlan, SavingPlan]:
+    return SavingPlan.objects.filter(user=user)
 
 # get by name is unreliable
-def get_account_by_citizen_id(citizen_id: str) -> QuerySet[SavingAccount, SavingAccount]:
-    return SavingAccount.objects.filter(citizen_id=citizen_id)
+def get_account_by_citizen_id(citizen_id: str) -> QuerySet[SavingPlan, SavingPlan]:
+    return SavingPlan.objects.filter(citizen_id=citizen_id)
 
-def deposit_to_account(account: SavingAccount, amount: Decimal):
+def deposit_to_account(account: SavingPlan, amount: Decimal):
     # only allow deposit at maturity date (fixed-term only)
 
     if amount < Decimal("100000"):
@@ -83,7 +83,7 @@ def deposit_to_account(account: SavingAccount, amount: Decimal):
             balance_after=account.balance
         )
 
-def withdraw_from_account(account: SavingAccount, amount: Decimal) -> Decimal:
+def withdraw_from_account(account: SavingPlan, amount: Decimal) -> Decimal:
     # fixed-term: - only allow withdrawal after maturity day and have to withdraw all balances
     #             - after maturity, interest rate will be non-fixed-term interest rate
     #             - close after withdrawal
@@ -143,7 +143,7 @@ def withdraw_from_account(account: SavingAccount, amount: Decimal) -> Decimal:
 
             return amount
 
-def apply_interest(account: SavingAccount):
+def apply_interest(account: SavingPlan):
     # Fixed-term: estimate payout as principal + simple interest.
     if not account.saving_type.is_flexible:
         return account.balance + (account.balance * account.interest_rate / 100)
@@ -208,7 +208,7 @@ def change_saving_type_rate(saving_type: SavingType, new_rate: Decimal, effectiv
 
     return saving_type
 
-def close_account(account: SavingAccount):
+def close_account(account: SavingPlan):
     return account.delete()
 
 def get_statistics(period, date, account, month=None, year=None):
