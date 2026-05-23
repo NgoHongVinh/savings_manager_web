@@ -101,22 +101,12 @@
 const hasRead = document.getElementById('id_hasRead');
 const hasWrite = document.getElementById('id_hasWrite');
 
-hasRead.addEventListener("change", () => {
-    if (hasRead.checked) {
-        hasWrite.disabled = false;
-    } else {
-        hasWrite.checked = false;
-        hasWrite.disabled = true;
-    }
-});
-
-hasWrite.addEventListener("change", () => {
-    if (hasWrite.checked) {
-        hasRead.checked = true;
-        hasRead.disabled = true;
-    } else {
-        hasRead.disabled = false;
-    }
-});
+hasRead.onclick = (e) => {
+    if (!hasRead.checked) hasWrite.checked = false;
+    if (hasWrite.checked) e.preventDefault();
+};
+hasWrite.onclick = (e) => {
+    if (hasWrite.checked) hasRead.checked = true;
+};
 </script>
 {% endblock %}

@@ -12,13 +12,7 @@ class EmployeeChangeForm(forms.Form):
 
         if self.user.is_employee:
             self.fields["hasRead"].initial = True
-            self.fields["hasWrite"].initial = (
-                    user.employee.role == EmployeeRole.WRITE
-            )
-
-            # Can't remove read while write exists
-            if user.employee.role == EmployeeRole.WRITE:
-                self.fields["hasRead"].disabled = True
+            self.fields["hasWrite"].initial = user.employee.role == EmployeeRole.WRITE
 
     def clean(self):
         cleaned_data = super().clean()
@@ -44,8 +38,8 @@ class EmployeeChangeForm(forms.Form):
             role = EmployeeRole.READ
 
         employee, created = Employee.objects.get_or_create(user=self.user, defaults={"role": role})
-        if not created: # exist, update role
+        if employee.role != role:
             employee.role = role
-            employee.save()
+            employee.save(update_fields=["role"])
 
         return employee
