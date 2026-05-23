@@ -2,10 +2,17 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'employees/user_profile.css' %}">
+<link rel="stylesheet" href="{% static 'employees/user_detail.css' %}">
 {% endblock %}
 
 {% block content %}
+
+{% if message_success %}
+<div class="messages">
+    <div class="message success">{{ message_success }}</div>
+</div>
+{% endif %}
+
 <div class="user-layout">
     <aside class="user-sidebar card">
         <div class="avatar">
@@ -56,14 +63,60 @@
                 {% csrf_token %}
                 <input type="hidden" name="form_type" value="employee">
 
-                {{ employee_form.as_p }}
+                <div class="checkbox-group">
+                    <div class="checkbox-field">
+                        {{ employee_form.hasRead }}
+                        <label for="{{ employee_form.hasRead.id_for_label }}">
+                            Read Access
+                        </label>
+                    </div>
+
+                    <div class="checkbox-field">
+                        {{ employee_form.hasWrite }}
+                        <label for="{{ employee_form.hasWrite.id_for_label }}">
+                            Write Access
+                        </label>
+                    </div>
+                </div>
+
+                {% if employee_form.errors %}
+                    {{ employee_form.errors }}
+                {% endif %}
 
                 <div class="form-actions">
-                    <button type="submit" class="danger-button">Remove Employee Access</button>
-                    <button type="submit">Save Changes</button>
+                    <button type="submit" name="action" value="remove" class="danger-button">
+                        Remove Employee Access
+                    </button>
+
+                    <button type="submit" name="action" value="save">
+                        Save Changes
+                    </button>
                 </div>
             </form>
         </section>
     </div>
 </div>
+
+<script>
+const hasRead = document.getElementById('id_hasRead');
+const hasWrite = document.getElementById('id_hasWrite');
+
+hasRead.addEventListener("change", () => {
+    if (hasRead.checked) {
+        hasWrite.disabled = false;
+    } else {
+        hasWrite.checked = false;
+        hasWrite.disabled = true;
+    }
+});
+
+hasWrite.addEventListener("change", () => {
+    if (hasWrite.checked) {
+        hasRead.checked = true;
+        hasRead.disabled = true;
+    } else {
+        hasRead.disabled = false;
+    }
+});
+</script>
 {% endblock %}
