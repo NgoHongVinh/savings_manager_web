@@ -41,8 +41,14 @@ def manage_user_detail(request, user_id):
                 action = request.POST.get("action")
                 if action == "remove":
                     if user.is_employee:
-                        user.employee.delete()
-                        request.session["message_success"] = "Employee access updated successfully."
+                        if not user.is_customer:
+                            # if user is not a customer, delete the user
+                            user.delete()
+                            request.session["message_success"] = "User deleted successfully."
+                            return redirect(manage_users)
+                        else:
+                            user.employee.delete()
+                            request.session["message_success"] = "Employee access updated successfully."
                     else:
                         request.session["employee_form_errors"] = { "__all__": ["User is not Employee"] }
                 else:

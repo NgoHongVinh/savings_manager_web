@@ -85,7 +85,11 @@
 
                 <div class="form-actions">
                     <button type="submit" name="action" value="remove" class="danger-button">
+                        {% if user.is_customer %}
                         Remove Employee Access
+                        {% else %}
+                        Remove User
+                        {% endif %}
                     </button>
 
                     <button type="submit" name="action" value="save">
