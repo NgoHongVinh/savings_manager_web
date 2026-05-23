@@ -1,6 +1,8 @@
+from allauth.account.models import EmailAddress
 from django import forms
 
-from users.models import EmployeeRole, Employee
+from users.models import EmployeeRole, Employee, CustomUser, Customer
+
 
 class EmployeeChangeForm(forms.Form):
     hasRead = forms.BooleanField(required=False)
@@ -43,3 +45,73 @@ class EmployeeChangeForm(forms.Form):
             employee.save(update_fields=["role"])
 
         return employee
+
+class UserCreateForm(forms.Form):
+    email = forms.EmailField()
+    password1 = forms.CharField(widget=forms.PasswordInput)
+    password2 = forms.CharField(widget=forms.PasswordInput)
+
+    is_customer = forms.BooleanField(required=False)
+
+    has_read = forms.BooleanField(required=False, initial=True)
+    has_write = forms.BooleanField(required=False)
+
+    full_name = forms.CharField(required=False)
+    citizen_id = forms.CharField(required=False)
+    address = forms.CharField(required=False)
+
+    def clean(self):
+        cleaned_data = super().clean()
+
+        is_customer = cleaned_data.get("is_customer")
+        has_write = cleaned_data.get("has_write")
+
+        if has_write:
+            cleaned_data["has_read"] = True
+
+        if is_customer:
+            required_fields = [
+                "full_name",
+                "citizen_id",
+                "address"
+            ]
+
+            for field in required_fields:
+                if not cleaned_data.get(field):
+                    self.add_error(field, "This field is required.")
+
+        return cleaned_data
+
+    def save(self):
+        user = CustomUser.objects.create_user(
+            email=self.cleaned_data["email"],
+            password=self.cleaned_data["password1"]
+        )
+
+        # Auto verify email
+        EmailAddress.objects.create(
+            user=user,
+            email=user.email,
+            verified=True,
+            primary=True
+        )
+
+        if self.cleaned_data["has_read"]:
+            role = EmployeeRole.READ
+            if self.cleaned_data["has_write"]:
+                role = EmployeeRole.WRITE
+
+            Employee.objects.create(
+                user=user,
+                role=role
+            )
+
+        if self.cleaned_data["is_customer"]:
+            Customer.objects.create(
+                user=user,
+                full_name=self.cleaned_data["full_name"],
+                citizen_id=self.cleaned_data["citizen_id"],
+                address=self.cleaned_data["address"]
+            )
+
+        return user
