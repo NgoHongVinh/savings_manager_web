@@ -16,7 +16,7 @@ def profile(request):
                     information_form.save()
                     request.session["message_success"] = "Information updated successfully."
                 else:
-                    request.session["info_errors"] = information_form.errors
+                    request.session["info_form_errors"] = information_form.errors
             case "password":
                 password_form = PasswordChangeForm(request.user, request.POST)
 
@@ -25,7 +25,7 @@ def profile(request):
                     request.session["message_success"] = "Password updated successfully."
                     update_session_auth_hash(request, user)
                 else:
-                    request.session["password_errors"] = password_form.errors
+                    request.session["password_form_errors"] = password_form.errors
             case "email":
                 email_form = EmailChangeForm(request.POST, user=request.user)
 
@@ -33,7 +33,7 @@ def profile(request):
                     email_form.save()
                     request.session["message_success"] = "Email updated successfully."
                 else:
-                    request.session["email_errors"] = email_form.errors
+                    request.session["email_form_errors"] = email_form.errors
 
         return redirect("profile")
 
@@ -42,9 +42,9 @@ def profile(request):
         password_form = PasswordChangeForm(request.user)
         email_form = EmailChangeForm(user=request.user)
 
-        read_session_errors(information_form, request.session, "info_errors")
-        read_session_errors(password_form, request.session, "password_errors")
-        read_session_errors(email_form, request.session, "email_errors")
+        read_session_errors(information_form, request.session, "info_form_errors")
+        read_session_errors(password_form, request.session, "password_form_errors")
+        read_session_errors(email_form, request.session, "email_form_errors")
 
     return render(request, "account/profile.html", {
         "information_form": information_form,
