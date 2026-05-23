@@ -2,8 +2,9 @@ from django.shortcuts import render, get_object_or_404, redirect
 
 from dashboard.utils import read_session_errors
 from savings.models import SavingPlan, Transaction
-from users.forms import InformationChangeForm, EmployeeChangeForm
+from users.forms import InformationChangeForm
 from users.models import CustomUser
+from .forms import EmployeeChangeForm
 
 def employee_dashboard(request):
     return render(request, "employees/dashboard.html")
@@ -26,14 +27,14 @@ def manage_user_detail(request, user_id):
     if request.method == "POST":
         match request.POST.get("form_type"):
             case "customer":
-                customer_form = InformationChangeForm(request.POST, instance=request.user.customer)
+                customer_form = InformationChangeForm(request.POST, instance=user.customer)
                 if customer_form.is_valid():
                     customer_form.save()
                     request.session["message_success"] = "Customer information updated successfully."
                 else:
                     request.session["customer_form_errors"] = customer_form.errors
             case "employee":
-                employee_form = EmployeeChangeForm(request.POST, instance=request.user)
+                employee_form = EmployeeChangeForm(request.POST, user=user)
                 if employee_form.is_valid():
                     employee_form.save()
                     request.session["message_success"] = "Customer information updated successfully."
@@ -44,12 +45,12 @@ def manage_user_detail(request, user_id):
 
     else:
         if request.user.is_customer:
-            customer_form = InformationChangeForm(instance=request.user)
+            customer_form = InformationChangeForm(instance=user)
             read_session_errors(customer_form, request.session, "customer_form_errors")
         else:
             customer_form = None
 
-        employee_form = EmployeeChangeForm(request.user)
+        employee_form = EmployeeChangeForm(user=user)
         read_session_errors(employee_form, request.session, "employee_form_errors")
 
     return render(request, "employees/user_detail.html", {
@@ -58,6 +59,9 @@ def manage_user_detail(request, user_id):
         "employee_form": employee_form,
         "message_success": request.session.pop("message_success", None)
     })
+
+def create_user(request):
+    pass
 
 def manage_saving_plan_detail(request, account_number):
     pass
