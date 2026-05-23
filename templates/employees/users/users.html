@@ -6,6 +6,11 @@
 {% endblock %}
 
 {% block content %}
+{% if message_success %}
+<div class="messages">
+    <div class="message success">{{ message_success }}</div>
+</div>
+{% endif %}
 
 <div class="page-header">
     <div>

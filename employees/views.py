@@ -12,7 +12,10 @@ def employee_dashboard(request):
 
 def manage_users(request):
     users = CustomUser.objects.all()
-    return render(request, "employees/users/users.html", {"users": users})
+    return render(request, "employees/users/users.html", {
+        "users": users,
+        "message_success": request.session.pop("message_success", None)
+    })
 
 def manage_saving_plans(request):
     saving_plans = SavingPlan.objects.all()
