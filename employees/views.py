@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404, redirect
 
 from dashboard.utils import read_session_errors
-from savings.models import SavingPlan, Transaction
+from savings.models import SavingPlan, Transaction, TransactionType
 from users.forms import InformationChangeForm
 from users.models import CustomUser
 from .forms import EmployeeChangeForm, UserCreateForm
@@ -22,8 +22,21 @@ def manage_saving_plans(request):
     return render(request, "employees/savings/savings.html", {"saving_plans": saving_plans})
 
 def manage_transactions(request):
-    transactions = Transaction.objects.all()
-    return render(request, "employees/savings/transactions.html", {"transactions": transactions})
+    transactions = Transaction.objects.select_related("saving_plan").order_by("-timestamp")
+
+    query = request.GET.get("q")
+    transaction_type = request.GET.get("type")
+
+    if query:
+        query_set = transactions.filter(saving_plan__id__icontains=query)
+
+    if transaction_type:
+        query_set = transactions.filter(transaction_type=transaction_type)
+
+    return render(request, "employees/savings/transactions.html", {
+        "transactions": transactions,
+        "transaction_types": TransactionType.choices,
+    })
 
 def manage_user_detail(request, user_id):
     user = get_object_or_404(CustomUser, id=user_id)
