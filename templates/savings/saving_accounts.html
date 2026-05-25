@@ -15,34 +15,32 @@
 {% endif %}
 
 <div class="grid">
-
   <section class="card">
-    <h3>Create Saving Account</h3>
+    <h3>Transaction</h3>
     <form method="post">
       {% csrf_token %}
-      <input type="hidden" name="form_type" value="create">
-      {{ create_form.as_p }}
-      <button type="submit">Create</button>
-    </form>
-  </section>
-
-  <section class="card">
-    <h3>Deposit</h3>
-    <form method="post">
-      {% csrf_token %}
-      <input type="hidden" name="form_type" value="deposit">
-      {{ deposit_form.as_p }}
-      <button type="submit">Deposit</button>
-    </form>
-  </section>
-
-  <section class="card">
-    <h3>Withdraw</h3>
-    <form method="post">
-      {% csrf_token %}
-      <input type="hidden" name="form_type" value="withdraw">
-      {{ withdraw_form.as_p }}
-      <button type="submit">Withdraw</button>
+      <input type="hidden" name="form_type" value="transaction">
+      <div class="field" id="txn-action-field">
+        <label>Action</label>
+        {{ transaction_form.action }}
+      </div>
+      <div class="field" id="txn-account-field">
+        <label>Account</label>
+        {{ transaction_form.account }}
+      </div>
+      <div class="field" id="txn-saving-type-field">
+        <label>Saving type</label>
+        {{ transaction_form.saving_type }}
+      </div>
+      <div class="field" id="txn-initial-balance-field">
+        <label>Initial balance</label>
+        {{ transaction_form.initial_balance }}
+      </div>
+      <div class="field" id="txn-amount-field">
+        <label>Amount</label>
+        {{ transaction_form.amount }}
+      </div>
+      <button type="submit">Submit</button>
     </form>
   </section>
 
@@ -132,10 +130,15 @@
 document.addEventListener("DOMContentLoaded", function () {
 
     const period = document.querySelector("select[name='period_type']");
+    const txnAction = document.getElementById("id_txn-action");
 
     const day = document.getElementById("day-field");
     const month = document.getElementById("month-field");
     const year = document.getElementById("year-field");
+    const txnAccount = document.getElementById("txn-account-field");
+    const txnSavingType = document.getElementById("txn-saving-type-field");
+    const txnInitialBalance = document.getElementById("txn-initial-balance-field");
+    const txnAmount = document.getElementById("txn-amount-field");
 
     function updateUI() {
         const value = period.value;
@@ -157,6 +160,26 @@ document.addEventListener("DOMContentLoaded", function () {
 
     period.addEventListener("change", updateUI);
     updateUI();
+
+    function updateTxnUI() {
+      if (!txnAction) return;
+      const action = txnAction.value;
+      if (action === "create") {
+        txnAccount.style.display = "none";
+        txnAmount.style.display = "none";
+        txnSavingType.style.display = "block";
+        txnInitialBalance.style.display = "block";
+      } else {
+        txnAccount.style.display = "block";
+        txnAmount.style.display = "block";
+        txnSavingType.style.display = "none";
+        txnInitialBalance.style.display = "none";
+      }
+    }
+    if (txnAction) {
+      txnAction.addEventListener("change", updateTxnUI);
+      updateTxnUI();
+    }
 });
 </script>
 
@@ -192,7 +215,6 @@ document.addEventListener("DOMContentLoaded", function () {
     <thead>
       <tr>
         <th>Account No.</th>
-        <th>Name</th>
         <th>Type</th>
         <th>Balance</th>
         <th>Interest</th>
@@ -203,14 +225,13 @@ document.addEventListener("DOMContentLoaded", function () {
       {% for account in accounts %}
       <tr>
         <td>{{ account.account_number }}</td>
-        <td>{{ account.name }}</td>
         <td>{{ account.saving_type.name }}</td>
         <td>{{ account.balance }}</td>
         <td>{{ account.interest_rate }}%</td>
         <td>{{ account.maturity_date|default:"-" }}</td>
       </tr>
       {% empty %}
-      <tr><td colspan="6">No saving accounts yet.</td></tr>
+      <tr><td colspan="5">No saving accounts yet.</td></tr>
       {% endfor %}
     </tbody>
   </table>

@@ -24,7 +24,7 @@
                 <a href="#" class="nav-login">{{ user.email }}</a>
 
                 <div class="dropdown">
-                    <a href="#">Dashboard</a>
+                    <a href="{% url 'employee_dashboard' %}">Dashboard</a>
                     <a href="{% url 'account_logout' %}">Logout</a>
                 </div>
             </div>
