@@ -23,35 +23,50 @@ def get_all_accounts():
     return SavingPlan.objects.all()
 
 def create_account(
-        name: str, citizen_id: str, address: str, balance: Decimal,
-        user: CustomUser, saving_type: SavingType
+        initial_balance: Decimal,
+        user: CustomUser,
+        saving_type: SavingType
 ) -> SavingPlan:
     min_initial_deposit = Decimal(get_parameter("min_initial_deposit", 1_000_000))
-    if balance < min_initial_deposit:
+    if initial_balance < min_initial_deposit:
         raise ValueError(f"Minimum balance is {min_initial_deposit:,.0f}")
 
     maturity_date = None
     if not saving_type.is_flexible and saving_type.duration_months:
         maturity_date = _add_months(now().date(), saving_type.duration_months)
 
+    customer = getattr(user, "customer", user)
+
     account = SavingPlan.objects.create(
-        name=name, citizen_id=citizen_id, address=address, balance=balance,
+        balance=initial_balance,
         interest_rate=saving_type.interest_rate,
         # Start accrual tracking on account creation date for flexible accounts.
         interest_last_applied_on=now().date() if saving_type.is_flexible else None,
         maturity_date=maturity_date,
-        saving_type=saving_type, user=user)
+        saving_type=saving_type, customer=customer)
+
+    Transaction.objects.create(
+        saving_plan=account,
+        transaction_type='OPEN',
+        balance_before=Decimal("0.00"),
+        amount=initial_balance,
+        balance_after=initial_balance,
+    )
+
     return account
 
 def get_account_by_number(account_number: str) -> SavingPlan | None:
     return SavingPlan.objects.get(account_number=account_number)
 
 def get_account_by_user(user: CustomUser) -> QuerySet[SavingPlan, SavingPlan]:
-    return SavingPlan.objects.filter(user=user)
+    customer = getattr(user, "customer", None)
+    if customer is None:
+        return SavingPlan.objects.none()
+    return SavingPlan.objects.filter(customer=customer)
 
 # get by name is unreliable
 def get_account_by_citizen_id(citizen_id: str) -> QuerySet[SavingPlan, SavingPlan]:
-    return SavingPlan.objects.filter(citizen_id=citizen_id)
+    return SavingPlan.objects.filter(customer__citizen_id=citizen_id)
 
 def deposit_to_account(account: SavingPlan, amount: Decimal):
     minimum_deposit = Decimal(get_parameter("min_additional_deposit", 100_000))
@@ -78,9 +93,7 @@ def deposit_to_account(account: SavingPlan, amount: Decimal):
         account.save(update_fields=["balance"])
 
         Transaction.objects.create(
-            account=account,
-            account_number=account.account_number,
-            name=account.name,
+            saving_plan=account,
             transaction_type='DEPOSIT',
             balance_before=balance_before,
             amount=amount,
@@ -108,9 +121,7 @@ def withdraw_from_account(account: SavingPlan, amount: Decimal) -> Decimal:
             balance = apply_interest(account)
 
             Transaction.objects.create(
-                account=account,
-                account_number=account.account_number,
-                name=account.name,
+                saving_plan=account,
                 transaction_type='CLOSE',
                 balance_before=balance,
                 amount=balance, # withdraw all
@@ -136,9 +147,7 @@ def withdraw_from_account(account: SavingPlan, amount: Decimal) -> Decimal:
             account.save(update_fields=["balance"])
 
             Transaction.objects.create(
-                account=account,
-                account_number=account.account_number,
-                name=account.name,
+                saving_plan=account,
                 transaction_type='WITHDRAW',
                 balance_before=balance,
                 amount=amount,
@@ -254,7 +263,11 @@ def get_statistics(period: str, saving_plan=None, date=None, month=None, year=No
     return {
         "label": label,
         "account_number": saving_plan.account_number if saving_plan else "All",
-        "account_name": getattr(saving_plan, "name", "All accounts") if saving_plan else "All accounts",
+        "account_name": (
+            saving_plan.customer.full_name
+            if saving_plan and getattr(saving_plan, "customer", None)
+            else "All accounts"
+        ),
         "total_open": total_open,
         "total_deposit": total_deposit,
         "total_withdraw": total_withdraw,

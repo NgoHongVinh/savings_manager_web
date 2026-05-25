@@ -17,6 +17,9 @@ class SavingType(models.Model):
 
     is_active = models.BooleanField(default=True)
 
+    def __str__(self):
+        return self.name
+
     def save(self, *args, **kwargs):
         # Track old rate so we can append a new history row when rate changes.
         old_rate = None
@@ -92,8 +95,11 @@ class SavingPlan(models.Model):
     def delete(self, *args, **kwargs):
         # soft delete the account
         self.is_active = False
-        self.deleted_at = timezone.now()
-        self.save()
+        self.deactivated_at = timezone.now()
+        self.save(update_fields=["is_active", "deactivated_at"])
+
+    def __str__(self):
+        return f"{self.account_number} - {self.saving_type.name}"
 
 class TransactionType(models.TextChoices):
     OPEN = "OPEN", "Account Opening"

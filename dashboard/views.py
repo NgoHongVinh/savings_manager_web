@@ -41,7 +41,6 @@ def profile(request):
         information_form = InformationChangeForm(instance=request.user.customer)
         password_form = PasswordChangeForm(request.user)
         email_form = EmailChangeForm(user=request.user)
-
         read_session_errors(information_form, request.session, "info_form_errors")
         read_session_errors(password_form, request.session, "password_form_errors")
         read_session_errors(email_form, request.session, "email_form_errors")
