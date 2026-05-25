@@ -50,10 +50,10 @@ def manage_transactions(request):
     transaction_type = request.GET.get("type")
 
     if query:
-        query_set = transactions.filter(saving_plan__id__icontains=query)
+        transactions = transactions.filter(saving_plan__id__icontains=query)
 
     if transaction_type:
-        query_set = transactions.filter(transaction_type=transaction_type)
+        transactions = transactions.filter(transaction_type=transaction_type)
 
     return render(request, "employees/savings/transactions.html", {
         "transactions": transactions,
