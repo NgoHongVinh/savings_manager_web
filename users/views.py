@@ -1,10 +1,10 @@
-from django.shortcuts import render, redirect
-from django.contrib.auth.forms import PasswordChangeForm
 from django.contrib.auth import update_session_auth_hash
-from users.forms import InformationChangeForm, EmailChangeForm
+from django.contrib.auth.forms import PasswordChangeForm
+from django.shortcuts import redirect, render
 
-from .decorators import customer_required
-from .utils import read_session_errors
+from savings_manager_web.decorators import customer_required
+from savings_manager_web.utils import read_session_errors
+from users.forms import EmailChangeForm, InformationChangeForm
 
 @customer_required
 def profile(request):
