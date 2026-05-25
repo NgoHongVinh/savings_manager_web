@@ -130,3 +130,6 @@ def user_create(request):
 
 def manage_saving_plan_detail(request, account_number):
     pass
+
+def manage_reports(request):
+    return render(request, "employees/savings/reports.html")
