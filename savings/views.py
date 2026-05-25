@@ -1,5 +1,3 @@
-from decimal import Decimal
-
 from django.contrib import messages
 from django.shortcuts import redirect, render
 
@@ -9,7 +7,7 @@ from savings.forms import (
     ReportForm,
 )
 
-from savings.models import SavingType
+from savings.models import SavingType, Transaction
 
 from savings.services import (
     create_account,
@@ -18,7 +16,6 @@ from savings.services import (
     withdraw_from_account,
     get_statistics,
 )
-
 
 @customer_required
 def saving_accounts(request):
@@ -95,3 +92,22 @@ def saving_accounts(request):
             "statistics": statistics,
         },
     )
+
+@customer_required
+def transactions(request):
+    accounts = request.user.customer.saving_accounts.select_related("saving_type").order_by("account_number")
+    selected_account_number = request.GET.get("account", "")
+    selected_account = None
+    transactions = Transaction.objects.none()
+
+    if selected_account_number:
+        selected_account = accounts.filter(account_number=selected_account_number).first()
+        if selected_account:
+            transactions = selected_account.transactions.order_by("-timestamp")
+
+    return render(request, "savings/transactions.html", {
+        "accounts": accounts,
+        "selected_account": selected_account,
+        "selected_account_number": selected_account_number,
+        "transactions": transactions,
+    })
