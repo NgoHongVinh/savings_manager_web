@@ -61,7 +61,7 @@
                         {{ t.transaction_type }}
                     </span>
                 </td>
-                <td>#{{ t.saving_plan.id }}</td>
+                <td>#{{ t.saving_plan.plan_id }}</td>
                 <td>
                     {% if t.transaction_type == "DEPOSIT" or t.transaction_type == "OPEN" %}
                         <span class="amount-positive">
