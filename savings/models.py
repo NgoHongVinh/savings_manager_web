@@ -62,7 +62,7 @@ class SavingTypeRateHistory(models.Model):
         ordering = ["effective_from"]
 
 class SavingPlan(models.Model):
-    account_number = models.CharField(
+    plan_id = models.CharField(
         primary_key=True,
         max_length=10,
         default=generate_account_number,
@@ -99,7 +99,7 @@ class SavingPlan(models.Model):
         self.save(update_fields=["is_active", "deactivated_at"])
 
     def __str__(self):
-        return f"{self.account_number} - {self.saving_type.name}"
+        return f"{self.plan_id} - {self.saving_type.name}"
 
 class TransactionType(models.TextChoices):
     OPEN = "OPEN", "Account Opening"
