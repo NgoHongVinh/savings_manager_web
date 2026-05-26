@@ -1,0 +1,653 @@
+{% extends "employees/base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'employees/users.css' %}">
+
+<style>
+
+.form-grid{
+    display:grid;
+    grid-template-columns:repeat(2,1fr);
+    gap:20px;
+}
+
+.form-grid input,
+.form-grid select{
+    width:100%;
+    padding:12px 14px;
+    border:1px solid #dcdfe4;
+    border-radius:12px;
+    outline:none;
+    transition:0.2s;
+}
+
+.form-grid input:focus,
+.form-grid select:focus{
+    border-color:#3498db;
+    box-shadow:0 0 0 3px rgba(52,152,219,0.15);
+}
+
+.search-form{
+    display:flex;
+    gap:12px;
+    align-items:center;
+    flex-wrap:wrap;
+}
+
+.search-form input,
+.search-form select{
+    padding:12px 14px;
+    border:1px solid #dcdfe4;
+    border-radius:12px;
+    font-size:14px;
+    outline:none;
+    transition:0.2s;
+}
+
+.search-form input:focus,
+.search-form select:focus{
+    border-color:#3498db;
+    box-shadow:0 0 0 3px rgba(52,152,219,0.15);
+}
+
+.search-form input{
+    flex:1;
+    min-width:260px;
+}
+
+.search-form button{
+    padding:12px 18px;
+    border:none;
+    border-radius:12px;
+    background:linear-gradient(135deg,#3498db,#5dade2);
+    color:white;
+    font-weight:700;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.search-form button:hover{
+    transform:translateY(-1px);
+    box-shadow:0 5px 14px rgba(52,152,219,0.25);
+}
+
+.users-table{
+    width:100%;
+    border-collapse:separate;
+    border-spacing:0 18px;
+}
+
+.users-table thead th{
+    text-align:center;
+    padding:14px 18px;
+    font-size:15px;
+    color:#5f6b7a;
+    font-weight:700;
+    white-space:nowrap;
+}
+
+.users-table tbody tr{
+    background:#fff;
+    box-shadow:0 2px 10px rgba(0,0,0,0.04);
+}
+
+.users-table tbody td{
+    padding:22px 18px;
+    vertical-align:middle;
+    border-top:1px solid #f1f2f4;
+    border-bottom:1px solid #f1f2f4;
+    text-align:center;
+}
+
+.users-table tbody td:first-child{
+    border-left:1px solid #f1f2f4;
+    border-top-left-radius:18px;
+    border-bottom-left-radius:18px;
+}
+
+.users-table tbody td:last-child{
+    border-right:1px solid #f1f2f4;
+    border-top-right-radius:18px;
+    border-bottom-right-radius:18px;
+}
+
+.account-number{
+    font-weight:700;
+    font-size:16px;
+    color:#111827;
+}
+
+.account-number a{
+    color:inherit;
+    text-decoration:none;
+}
+
+.account-number a:hover{
+    color:#2563eb;
+}
+
+.cell-text{
+    max-width:180px;
+    line-height:1.5;
+    word-break:break-word;
+    color:#374151;
+    margin:auto;
+}
+
+.saving-type{
+    display:inline-block;
+    background:#eef4ff;
+    color:#2563eb;
+    padding:6px 12px;
+    border-radius:999px;
+    font-size:13px;
+    font-weight:600;
+    white-space:nowrap;
+}
+
+.balance{
+    font-weight:700;
+    color:#111827;
+    white-space:nowrap;
+}
+
+.interest{
+    color:#16a34a;
+    font-weight:600;
+    white-space:nowrap;
+}
+
+.action-wrapper{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+    min-width:260px;
+}
+
+.inline-form{
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    gap:10px;
+}
+
+.amount-input{
+    width:130px;
+    padding:10px 12px;
+    border:1px solid #dcdfe4;
+    border-radius:10px;
+    outline:none;
+    font-size:14px;
+    transition:0.2s;
+}
+
+.amount-input:focus{
+    border-color:#3498db;
+    box-shadow:0 0 0 3px rgba(52,152,219,0.15);
+}
+
+.action-btn{
+    border:none;
+    border-radius:10px;
+    padding:10px 14px;
+    cursor:pointer;
+    font-weight:700;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    min-width:110px;
+    transition:0.2s;
+    white-space:nowrap;
+}
+
+.deposit-btn{
+    background:#16a34a;
+}
+
+.deposit-btn:hover{
+    background:#15803d;
+}
+
+.withdraw-btn{
+    background:#dc2626;
+}
+
+.withdraw-btn:hover{
+    background:#b91c1c;
+}
+
+.edit-btn{
+    background:#2563eb;
+}
+
+.edit-btn:hover{
+    background:#1d4ed8;
+}
+
+.view-btn{
+    background:#6b7280;
+}
+
+.view-btn:hover{
+    background:#4b5563;
+}
+
+.empty-state{
+    text-align:center;
+    padding:40px;
+    color:#6b7280;
+}
+
+.messages{
+    margin-bottom:16px;
+}
+
+.message{
+    padding:12px 14px;
+    border-radius:10px;
+    margin-bottom:8px;
+    font-weight:600;
+}
+
+.message.success{
+    background:#e6ffed;
+    color:#2e7d32;
+    border:1px solid #b7ebc6;
+}
+
+.message.error{
+    background:#fef2f2;
+    color:#b91c1c;
+    border:1px solid #fecaca;
+}
+
+@media(max-width:1200px){
+
+    .users-table{
+        display:block;
+        overflow-x:auto;
+    }
+
+}
+
+@media(max-width:768px){
+
+    .form-grid{
+        grid-template-columns:1fr;
+    }
+
+    .inline-form{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .action-btn{
+        width:100%;
+    }
+
+    .action-wrapper{
+        min-width:250px;
+    }
+
+    .search-form{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .search-form input,
+    .search-form select,
+    .search-form button{
+        width:100%;
+    }
+
+    .amount-input{
+        width:100%;
+    }
+
+}
+
+</style>
+{% endblock %}
+
+{% block content %}
+
+<!-- MESSAGES -->
+{% if messages %}
+<div class="messages">
+
+    {% for message in messages %}
+        <div class="message {{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+
+</div>
+{% endif %}
+
+<!-- HEADER -->
+<div class="page-header">
+
+    <div>
+        <h1>Saving Accounts</h1>
+        <p>
+            Manage all saving accounts and transactions.
+        </p>
+    </div>
+
+    <a href="#create-account-section" class="create-button">
+        Create Account
+    </a>
+
+</div>
+
+<!-- CREATE ACCOUNT -->
+<section class="card" id="create-account-section">
+
+    <h2>Create Saving Account</h2>
+
+    <form method="post">
+
+        {% csrf_token %}
+
+        <input type="hidden" name="action" value="create">
+
+        <div class="form-grid">
+
+            <div>
+                <label>Name</label>
+                {{ create_form.name }}
+            </div>
+
+            <div>
+                <label>Citizen ID</label>
+                {{ create_form.citizen_id }}
+            </div>
+
+            <div>
+                <label>Address</label>
+                {{ create_form.address }}
+            </div>
+
+            <div>
+                <label>Initial Balance</label>
+                {{ create_form.balance }}
+            </div>
+
+            <div>
+                <label>Saving Type</label>
+                {{ create_form.saving_type }}
+            </div>
+
+        </div>
+
+        <br>
+
+        <button type="submit" class="create-button">
+            Create Account
+        </button>
+
+    </form>
+
+</section>
+
+<!-- SEARCH -->
+<section class="card">
+
+    <form method="get" class="search-form">
+
+        <input
+            type="text"
+            name="search"
+            placeholder="Enter keyword..."
+            value="{{ request.GET.search }}"
+        >
+
+        <select name="filter_by">
+
+            <option value="account_number"
+                {% if request.GET.filter_by == "account_number" %}
+                    selected
+                {% endif %}
+            >
+                Account Number
+            </option>
+
+            <option value="name"
+                {% if request.GET.filter_by == "name" %}
+                    selected
+                {% endif %}
+            >
+                Customer Name
+            </option>
+
+            <option value="citizen_id"
+                {% if request.GET.filter_by == "citizen_id" %}
+                    selected
+                {% endif %}
+            >
+                Citizen ID
+            </option>
+
+            <option value="address"
+                {% if request.GET.filter_by == "address" %}
+                    selected
+                {% endif %}
+            >
+                Address
+            </option>
+
+            <option value="saving_type"
+                {% if request.GET.filter_by == "saving_type" %}
+                    selected
+                {% endif %}
+            >
+                Saving Type
+            </option>
+
+        </select>
+
+        <button type="submit">
+            Filter
+        </button>
+
+    </form>
+
+</section>
+
+<!-- TABLE -->
+<section class="card">
+
+    <table class="users-table">
+
+        <thead>
+
+            <tr>
+
+                <th>Account Number</th>
+                <th>Customer Name</th>
+                <th>Citizen ID</th>
+                <th>Address</th>
+                <th>Saving Type</th>
+                <th>Balance</th>
+                <th>Interest</th>
+                <th>Actions</th>
+
+            </tr>
+
+        </thead>
+
+        <tbody>
+
+            {% for plan in saving_plans %}
+
+            <tr>
+
+                <!-- ACCOUNT NUMBER -->
+                <td>
+                    <div class="account-number">
+                        <a href="{% url 'manage_saving_plan_detail' plan.account_number %}">
+                            {{ plan.account_number }}
+                        </a>
+                    </div>
+                </td>
+
+                <!-- CUSTOMER -->
+                <td>
+                    <div class="cell-text">
+                        {% if plan.customer %}
+                            {{ plan.customer.full_name }}
+                        {% else %}
+                            No Customer
+                        {% endif %}
+                    </div>
+                </td>
+
+                <!-- CITIZEN ID -->
+                <td>
+                    <div class="cell-text">
+                        {% if plan.customer %}
+                            {{ plan.customer.citizen_id }}
+                        {% endif %}
+                    </div>
+                </td>
+
+                <!-- ADDRESS -->
+                <td>
+                    <div class="cell-text">
+                        {% if plan.customer %}
+                            {{ plan.customer.address }}
+                        {% endif %}
+                    </div>
+                </td>
+
+                <!-- SAVING TYPE -->
+                <td>
+                    <span class="saving-type">
+                        {{ plan.saving_type.name }}
+                    </span>
+                </td>
+
+                <!-- BALANCE -->
+                <td>
+                    <div class="balance">
+                        {{ plan.balance }}
+                    </div>
+                </td>
+
+                <!-- INTEREST -->
+                <td>
+                    <div class="interest">
+                        {{ plan.interest_rate }}%
+                    </div>
+                </td>
+
+                <!-- ACTIONS -->
+                <td>
+
+                    <div class="action-wrapper">
+
+                        <!-- DEPOSIT -->
+                        <form method="post" class="inline-form">
+
+                            {% csrf_token %}
+
+                            <input
+                                type="hidden"
+                                name="action"
+                                value="deposit"
+                            >
+
+                            <input
+                                type="hidden"
+                                name="account_number"
+                                value="{{ plan.account_number }}"
+                            >
+
+                            <input
+                                type="number"
+                                name="amount"
+                                min="0.01"
+                                step="0.01"
+                                placeholder="Amount"
+                                class="amount-input"
+                                required
+                            >
+
+                            <button
+                                type="submit"
+                                class="action-btn deposit-btn"
+                            >
+                                + Deposit
+                            </button>
+
+                        </form>
+
+                        <!-- WITHDRAW -->
+                        <form method="post" class="inline-form">
+
+                            {% csrf_token %}
+
+                            <input
+                                type="hidden"
+                                name="action"
+                                value="withdraw"
+                            >
+
+                            <input
+                                type="hidden"
+                                name="account_number"
+                                value="{{ plan.account_number }}"
+                            >
+
+                            <input
+                                type="number"
+                                name="amount"
+                                min="0.01"
+                                step="0.01"
+                                placeholder="Amount"
+                                class="amount-input"
+                                required
+                            >
+
+                            <button
+                                type="submit"
+                                class="action-btn withdraw-btn"
+                            >
+                                − Withdraw
+                            </button>
+
+                        </form>
+
+                        <!-- ACTION LINKS -->
+                        <div class="inline-form">
+                            <a href="{% url 'manage_saving_plan_detail' plan.account_number %}" class="action-btn view-btn">
+                                View Details
+                            </a>
+                            <a href="{% url 'edit_saving_plan' plan.account_number %}" class="action-btn edit-btn">
+                                Edit
+                            </a>
+                        </div>
+
+                    </div>
+
+                </td>
+
+            </tr>
+
+            {% empty %}
+
+            <tr>
+
+                <td colspan="8" class="empty-state">
+                    No saving accounts found.
+                </td>
+
+            </tr>
+
+            {% endfor %}
+        </tbody>
+    </table>
+</section>
+{% endblock %}

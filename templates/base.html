@@ -1,0 +1,45 @@
+{% load static %}
+<!DOCTYPE html>
+<html>
+<head>
+    <title>{% block title %}Saving Account Manager{% endblock %}</title>
+
+    <!-- Link CSS -->
+    <link rel="stylesheet" href="{% static 'styles.css' %}">
+
+    {% block extra_css %}{% endblock %}
+</head>
+<body>
+    <div class="topbar">
+        <div class="left-section">
+            <a href="{% url 'profile' %}" class="app-name">Saving Account Manager</a>
+            <a href="{% url 'saving_accounts' %}" class="nav-button">Savings</a>
+            <a href="{% url 'transactions' %}" class="nav-button">Transactions</a>
+        </div>
+
+        <div class="right-section">
+            {% if user.is_authenticated %}
+                <div class="user-menu">
+                    <a href="#" class="nav-login">{{ user.email }}</a>
+
+                    <div class="dropdown">
+                        <a href="{% url 'profile' %}">Profile</a>
+                        <a href="{% url 'account_logout' %}">Logout</a>
+                        {% if user.is_employee %}
+                        <a href="{% url 'employee_dashboard' %}">Employee Page</a>
+                        {% endif %}
+                    </div>
+                </div>
+            {% else %}
+                <a href="{% url 'account_login' %}" class="nav-login">Login</a>
+            {% endif %}
+        </div>
+    </div>
+
+    <main>
+        {% block content %}
+        {% endblock %}
+    </main>
+
+</body>
+</html>
