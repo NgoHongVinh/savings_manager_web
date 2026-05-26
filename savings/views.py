@@ -7,69 +7,51 @@ from savings.forms import (
     ReportForm,
 )
 
-from savings.models import SavingType, Transaction
-
 from savings.services import (
-    create_saving_plan,
-    deposit,
+    generate_statistics,
+    get_active_saving_types,
+    get_customer_transactions_context,
     get_plans_by_user,
-    withdraw,
-    get_statistics,
+    process_transaction_form,
 )
 
 @customer_required
-def saving_accounts(request):
-    accounts = get_plans_by_user(request.user)
-    saving_types = SavingType.objects.filter(is_active=True).order_by("name")
-    transaction_form = TransactionForm(prefix="txn", accounts_qs=accounts)
+def saving_plans(request):
+    saving_plans = get_plans_by_user(request.user)
+    saving_types = get_active_saving_types()
+    transaction_form = TransactionForm(prefix="txn", saving_plans_qs=saving_plans)
 
-    report_form = ReportForm(accounts_qs=accounts)
+    report_form = ReportForm(saving_plans_qs=saving_plans)
     statistics = None
 
     if request.method == "POST":
         form_type = request.POST.get("form_type")
         try:
             if form_type == "transaction":
-                transaction_form = TransactionForm(request.POST, prefix="txn", accounts_qs=accounts)
+                transaction_form = TransactionForm(request.POST, prefix="txn", saving_plans_qs=saving_plans)
 
                 if transaction_form.is_valid():
                     action = transaction_form.cleaned_data["action"]
+                    process_transaction_form(request.user.customer, transaction_form.cleaned_data)
 
                     if action == "create":
-                        create_saving_plan(user=request.user, saving_type=transaction_form.cleaned_data["saving_type"],
-                                           initial_balance=transaction_form.cleaned_data["initial_balance"])
-                        messages.success(request, "Saving account created successfully.")
+                        messages.success(request, "Saving plan created successfully.")
                     elif action == "deposit":
-                        account = transaction_form.cleaned_data["account"]
-                        amount = transaction_form.cleaned_data["amount"]
-                        deposit(account, amount)
                         messages.success(request, "Deposit completed.")
                     else:
-                        account = transaction_form.cleaned_data["account"]
-                        amount = transaction_form.cleaned_data["amount"]
-                        withdraw(account, amount)
                         messages.success(request, "Withdrawal completed.")
-                    return redirect("saving_accounts")
+                    return redirect("saving_plans")
 
             elif form_type == "statistics":
 
-                report_form = ReportForm(request.POST, accounts_qs=accounts)
+                report_form = ReportForm(request.POST, saving_plans_qs=saving_plans)
 
                 if report_form.is_valid():
 
-                    period_type = report_form.cleaned_data["period_type"]
-                    account = report_form.cleaned_data["account"]
-                    date = report_form.cleaned_data.get("date")
-
-                    month = request.POST.get("month")
-                    year = request.POST.get("year")
-
-                    statistics = get_statistics(
-                        period=period_type,
-                        saving_plan=account,
-                        date=date,
-                        month=month,
-                        year=year,
+                    statistics = generate_statistics(
+                        report_form.cleaned_data,
+                        month=request.POST.get("month"),
+                        year=request.POST.get("year"),
                     )
 
                     messages.success(request, "Report generated successfully.")
@@ -79,9 +61,9 @@ def saving_accounts(request):
 
     return render(
         request,
-        "savings/saving_accounts.html",
+        "savings/saving_plans.html",
         {
-            "accounts": accounts,
+            "saving_plans": saving_plans,
             "saving_types": saving_types,
             "transaction_form": transaction_form,
 
@@ -92,19 +74,8 @@ def saving_accounts(request):
 
 @customer_required
 def transactions(request):
-    accounts = request.user.customer.saving_accounts.select_related("saving_type").order_by("plan_id")
-    selected_account_number = request.GET.get("account", "")
-    selected_account = None
-    transactions = Transaction.objects.none()
-
-    if selected_account_number:
-        selected_account = accounts.filter(account_number=selected_account_number).first()
-        if selected_account:
-            transactions = selected_account.transactions.order_by("-timestamp")
-
-    return render(request, "savings/transactions.html", {
-        "accounts": accounts,
-        "selected_account": selected_account,
-        "selected_account_number": selected_account_number,
-        "transactions": transactions,
-    })
+    context = get_customer_transactions_context(
+        request.user,
+        selected_plan_id=request.GET.get("saving_plan", ""),
+    )
+    return render(request, "savings/transactions.html", context)

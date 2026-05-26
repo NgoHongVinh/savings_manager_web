@@ -5,9 +5,10 @@ import random
 
 from users.models import Customer
 
-def generate_account_number():
-    """Generates a random 10-digit account number."""
+def generate_plan_id():
+    """Generates a random 10-digit saving plan ID."""
     return "".join([str(random.randint(0, 9)) for _ in range(10)])
+
 
 class SavingType(models.Model):
     name = models.CharField(max_length=50)
@@ -52,7 +53,7 @@ class SavingType(models.Model):
             )
 
 class SavingTypeRateHistory(models.Model):
-    # Keep a timeline of rates so flexible accounts can calculate past periods correctly.
+    # Keep a timeline of rates so flexible saving plans can calculate past periods correctly.
     saving_type = models.ForeignKey(SavingType, on_delete=models.CASCADE, related_name="rate_history")
     interest_rate = models.DecimalField(max_digits=5, decimal_places=4)
     effective_from = models.DateField()
@@ -65,7 +66,7 @@ class SavingPlan(models.Model):
     plan_id = models.CharField(
         primary_key=True,
         max_length=10,
-        default=generate_account_number,
+        default=generate_plan_id,
         editable=False
     )
     balance = models.DecimalField(max_digits=12, decimal_places=2, default=0.00)
@@ -75,12 +76,12 @@ class SavingPlan(models.Model):
 
     interest_rate = models.DecimalField(max_digits=5, decimal_places=4) # snapshot
     start_date = models.DateField(auto_now_add=True) # lazy evaluation
-    maturity_date = models.DateField(null=True, blank=True)  # allow null for non-fixed-term accounts
-    # For flexible accounts, this tracks the last day we already accrued interest up to.
+    maturity_date = models.DateField(null=True, blank=True)  # allow null for non-fixed-term saving plans
+    # For flexible saving plans, this tracks the last day we already accrued interest up to.
     interest_last_applied_on = models.DateField(null=True, blank=True)
 
-    saving_type = models.ForeignKey(SavingType, on_delete=models.PROTECT, related_name="accounts")
-    customer = models.ForeignKey(Customer, null=True, on_delete=models.SET_NULL, related_name='saving_accounts')
+    saving_type = models.ForeignKey(SavingType, on_delete=models.PROTECT, related_name="saving_plans")
+    customer = models.ForeignKey(Customer, null=True, on_delete=models.SET_NULL, related_name='saving_plans')
 
     def deposit(self, amount):
         self.balance += amount
@@ -93,7 +94,7 @@ class SavingPlan(models.Model):
         self.save()
 
     def delete(self, *args, **kwargs):
-        # soft delete the account
+        # soft delete the saving plan
         self.is_active = False
         self.deactivated_at = timezone.now()
         self.save(update_fields=["is_active", "deactivated_at"])
@@ -102,10 +103,10 @@ class SavingPlan(models.Model):
         return f"{self.plan_id} - {self.saving_type.name}"
 
 class TransactionType(models.TextChoices):
-    OPEN = "OPEN", "Account Opening"
+    OPEN = "OPEN", "Saving Plan Opening"
     DEPOSIT = "DEPOSIT", "Deposit"
     WITHDRAW = "WITHDRAW", "Withdrawal"
-    CLOSE = "CLOSE", "Account Closing"
+    CLOSE = "CLOSE", "Saving Plan Closing"
 
 class Transaction(models.Model):
     transaction_type = models.CharField(max_length=10, choices=TransactionType)

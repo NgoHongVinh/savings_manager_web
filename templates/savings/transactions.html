@@ -16,15 +16,15 @@
 
     <section class="card">
         <form method="get" class="search-form">
-            <select name="account" required>
+            <select name="saving_plan" required>
                 <option value="">Select saving plan</option>
-                {% for account in accounts %}
-                <option value="{{ account.plan_id }}"
-                    {% if selected_account_number == account.plan_id %}
+                {% for saving_plan in saving_plans %}
+                <option value="{{ saving_plan.plan_id }}"
+                    {% if selected_plan_id == saving_plan.plan_id %}
                         selected
                     {% endif %}
                 >
-                    {{ account.plan_id }} - {{ account.saving_type.name }}
+                    {{ saving_plan.plan_id }} - {{ saving_plan.saving_type.name }}
                 </option>
                 {% endfor %}
             </select>
@@ -48,13 +48,13 @@
             </thead>
 
             <tbody>
-                {% if selected_account_number and not selected_account %}
+                {% if selected_plan_id and not selected_plan %}
                 <tr>
                     <td colspan="7" class="empty-state">
                         Saving plan not found.
                     </td>
                 </tr>
-                {% elif selected_account %}
+                {% elif selected_plan %}
                     {% for t in transactions %}
                     <tr>
                         <td>{{ t.id }}</td>

@@ -2,7 +2,7 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>{% block title %}Saving Account Manager{% endblock %}</title>
+    <title>{% block title %}Saving Plan Manager{% endblock %}</title>
 
     <!-- Link CSS -->
     <link rel="stylesheet" href="{% static 'styles.css' %}">
@@ -12,8 +12,8 @@
 <body>
     <div class="topbar">
         <div class="left-section">
-            <a href="{% url 'profile' %}" class="app-name">Saving Account Manager</a>
-            <a href="{% url 'saving_accounts' %}" class="nav-button">Savings</a>
+            <a href="{% url 'profile' %}" class="app-name">Saving Plan Manager</a>
+            <a href="{% url 'saving_plans' %}" class="nav-button">Savings</a>
             <a href="{% url 'transactions' %}" class="nav-button">Transactions</a>
         </div>
 
