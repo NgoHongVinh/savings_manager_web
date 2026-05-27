@@ -2,6 +2,7 @@ from django.shortcuts import render, redirect
 from django.utils.dateparse import parse_date
 from django.utils.timezone import now
 
+from dashboard.decorators import employee_required
 from dashboard.utils import read_session_errors
 from savings.models import TransactionType
 from users.forms import InformationChangeForm
@@ -19,10 +20,11 @@ from .services import (
     search_users,
 )
 
-
+@employee_required
 def employee_dashboard(request):
     return render(request, "employees/dashboard.html", get_dashboard_reports())
 
+@employee_required
 def manage_users(request):
     users = search_users(
         query=request.GET.get("search", ""),
@@ -34,6 +36,7 @@ def manage_users(request):
         "message_success": request.session.pop("message_success", None)
     })
 
+@employee_required
 def manage_transactions(request):
     transactions = search_transactions(
         query=request.GET.get("search", ""),
@@ -45,6 +48,7 @@ def manage_transactions(request):
         "transaction_types": TransactionType.choices,
     })
 
+@employee_required
 def manage_user_detail(request, user_id):
     user = get_user_by_id(user_id)
 
@@ -94,6 +98,7 @@ def manage_user_detail(request, user_id):
         "message_success": request.session.pop("message_success", None)
     })
 
+@employee_required
 def user_create(request):
     if request.method == "POST":
         form = UserCreateForm(request.POST)
@@ -110,6 +115,7 @@ def user_create(request):
 
     return render(request, "employees/users/user_create.html", { "form": form })
 
+@employee_required
 def manage_reports(request):
     today = now().date()
     current_month = today.strftime("%Y-%m")
@@ -127,6 +133,7 @@ def manage_reports(request):
     context = build_report_context(selected_report, selected_date, selected_month)
     return render(request, "employees/savings/reports.html", context)
 
+@employee_required
 def manage_saving_plans(request):
     search = request.GET.get("search", "").strip()
     saving_plans = search_saving_plans(search)
@@ -140,6 +147,7 @@ def manage_saving_plans(request):
         },
     )
 
+@employee_required
 def manage_saving_plan_detail(request, plan_id):
     saving_plan = get_saving_plan_by_id(plan_id)
     transactions = get_saving_plan_transactions(saving_plan)
@@ -153,9 +161,11 @@ def manage_saving_plan_detail(request, plan_id):
         },
     )
 
+@employee_required
 def manage_saving_types(request):
     pass
 
+@employee_required
 def manage_saving_type_detail(request, saving_type_id):
     saving_type = get_saving_type_by_id(saving_type_id)
 
