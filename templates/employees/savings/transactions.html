@@ -2,7 +2,7 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'employees/transaction.css' %}">
+<link rel="stylesheet" href="{% static 'employees/transactions.css' %}">
 {% endblock %}
 
 {% block content %}
@@ -58,7 +58,7 @@
                 <td>{{ t.id }}</td>
                 <td>
                     <span class="badge {{ t.transaction_type|lower }}">
-                        {{ t.transaction_type }}
+                        {{ t.get_transaction_type_display }}
                     </span>
                 </td>
                 <td>#{{ t.saving_plan.plan_id }}</td>

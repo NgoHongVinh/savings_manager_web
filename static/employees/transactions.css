@@ -72,6 +72,7 @@
 .transactions-table td {
     padding: 16px 12px;
     border-bottom: 1px solid #f3f4f6;
+    text-align: left;
 }
 
 .transactions-table th {
@@ -83,13 +84,6 @@
     border-bottom-color: #e5e7eb;
 }
 
-.transactions-table :is(th, td):nth-child(3),
-.transactions-table :is(th, td):nth-child(4),
-.transactions-table :is(th, td):nth-child(5),
-.transactions-table :is(th, td):nth-child(6) {
-    text-align: center;
-}
-
 .badge {
     display: inline-flex;
     padding: 6px 12px;
@@ -99,12 +93,18 @@
     font-weight: 600;
 }
 
+.badge.open {
+    background: #dcfce7;
+    color: #15803d;
+}
+
 .badge.deposit {
     background: #dbeafe;
     color: #1d4ed8;
 }
 
-.badge.withdraw {
+.badge.withdraw,
+.badge.close {
     background: #fee2e2;
     color: #b91c1c;
 }

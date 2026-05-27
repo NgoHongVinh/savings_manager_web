@@ -38,11 +38,11 @@
             <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Type</th>
+                    <th>Transaction Type</th>
                     <th>Saving Plan</th>
                     <th>Amount</th>
-                    <th>Before</th>
-                    <th>After</th>
+                    <th>Balance Before</th>
+                    <th>Balance After</th>
                     <th>Time</th>
                 </tr>
             </thead>
@@ -60,7 +60,7 @@
                         <td>{{ t.id }}</td>
                         <td>
                             <span class="badge {{ t.transaction_type|lower }}">
-                                {{ t.transaction_type }}
+                                {{ t.get_transaction_type_display }}
                             </span>
                         </td>
                         <td>#{{ t.saving_plan.plan_id }}</td>
