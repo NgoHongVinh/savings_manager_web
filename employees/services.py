@@ -3,10 +3,9 @@ from django.shortcuts import get_object_or_404
 from django.utils.dateparse import parse_date
 from django.utils.timezone import now
 
-from savings.models import SavingPlan, Transaction
+from savings.models import SavingPlan, SavingType, Transaction
 from savings.services import get_statistics
 from users.models import CustomUser
-
 
 def get_dashboard_reports():
     today = now().date()
@@ -63,8 +62,40 @@ def remove_employee_access(user):
     user.employee.delete()
     return "updated"
 
-def get_saving_plans():
-    return SavingPlan.objects.select_related("saving_type", "customer").all()
+def search_saving_plans(query=""):
+    saving_plans = (
+        SavingPlan.objects
+        .select_related("saving_type", "customer", "customer__user")
+        .order_by("-created_at")
+    )
+    query = query.strip()
+
+    if query:
+        saving_plans = saving_plans.filter(
+            Q(plan_id__icontains=query)
+            | Q(customer__full_name__icontains=query)
+            | Q(customer__citizen_id__icontains=query)
+            | Q(customer__user__email__icontains=query)
+            | Q(saving_type__name__icontains=query)
+        )
+
+    return saving_plans
+
+def get_saving_plan_by_id(plan_id):
+    return get_object_or_404(
+        SavingPlan.objects.select_related("saving_type", "customer", "customer__user"),
+        plan_id=plan_id,
+    )
+
+def get_saving_plan_transactions(saving_plan):
+    return (
+        saving_plan.transactions
+        .select_related("saving_plan")
+        .order_by("-timestamp")
+    )
+
+def get_saving_type_by_id(saving_type_id):
+    return get_object_or_404(SavingType, pk=saving_type_id)
 
 def search_transactions(query="", transaction_type=""):
     transactions = Transaction.objects.select_related("saving_plan", "saving_plan__saving_type").order_by("-timestamp")
