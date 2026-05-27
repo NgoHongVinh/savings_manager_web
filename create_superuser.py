@@ -28,7 +28,7 @@ if not User.objects.filter(email=email).exists():
 
     Employee.objects.create(
         user=user,
-        role={"role": EmployeeRole.WRITE}
+        role=EmployeeRole.WRITE
     )
 
     print("Superuser created")
