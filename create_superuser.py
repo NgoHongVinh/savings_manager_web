@@ -6,6 +6,7 @@ django.setup()
 
 from django.contrib.auth import get_user_model
 from allauth.account.models import EmailAddress
+from users.models import Employee, EmployeeRole
 
 User = get_user_model()
 
@@ -23,6 +24,11 @@ if not User.objects.filter(email=email).exists():
         email=user.email,
         primary=True,
         verified=True
+    )
+
+    Employee.objects.create(
+        user=user,
+        role={"role": EmployeeRole.WRITE}
     )
 
     print("Superuser created")
