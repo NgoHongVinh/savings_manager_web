@@ -150,9 +150,10 @@ def deposit(saving_plan: SavingPlan, amount: Decimal):
 def withdraw(saving_plan: SavingPlan, amount: Decimal) -> Decimal:
     """
     fixed-term: - only allow withdrawal after maturity day and have to withdraw all balances
+                - 1-year interest = balance * respective rate
                 - after maturity, the interest rate will be a non-fixed-term interest rate
                 - close after withdrawal
-    non-fixed-term: only allow withdrawal after 15 days, can withdraw partial
+    non-fixed-term: only allow withdrawal after 15 days since deposit, can withdraw partial
     calculate balance after maturity before withdrawal
     """
 
@@ -186,7 +187,7 @@ def withdraw(saving_plan: SavingPlan, amount: Decimal) -> Decimal:
             # 15-day lock
             days_since_start = (today - saving_plan.start_date).days
             if days_since_start < min_deposit_days_flexible:
-                raise ValueError(f"Cannot withdraw within first {min_deposit_days_flexible} days")
+                raise ValueError(f"Cannot withdraw within {min_deposit_days_flexible} days after deposited")
 
             if amount > saving_plan.balance:
                 raise ValueError("Insufficient balance")
