@@ -2,7 +2,7 @@ from django.shortcuts import render, redirect
 from django.utils.dateparse import parse_date
 from django.utils.timezone import now
 
-from dashboard.decorators import employee_required
+from dashboard.decorators import employee_required, employee_write_required
 from dashboard.utils import read_session_errors
 from savings.models import TransactionType
 from users.forms import InformationChangeForm
@@ -98,7 +98,7 @@ def manage_user_detail(request, user_id):
         "message_success": request.session.pop("message_success", None)
     })
 
-@employee_required
+@employee_write_required
 def user_create(request):
     if request.method == "POST":
         form = UserCreateForm(request.POST)
