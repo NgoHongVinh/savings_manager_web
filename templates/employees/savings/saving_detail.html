@@ -2,145 +2,140 @@
 {% load static %}
 
 {% block extra_css %}
-<link rel="stylesheet" href="{% static 'employees/users.css' %}">
-<style>
-.detail-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin-bottom:20px;}
-.detail-item{padding:15px;background:#f5f7fa;border-radius:8px;}
-.detail-label{font-size:12px;color:#666;text-transform:uppercase;font-weight:700;margin-bottom:5px;}
-.detail-value{font-size:16px;font-weight:700;color:#333;}
-.full-width{grid-column:1 / -1;}
-.balance-positive{color:#16a34a;}
-.interest-rate{color:#2563eb;}
-.back-link{display:inline-block;margin-bottom:20px;color:#3498db;text-decoration:none;}
-.back-link:hover{text-decoration:underline;}
-</style>
+<link rel="stylesheet" href="{% static 'employees/savings.css' %}">
 {% endblock %}
 
 {% block content %}
+<div class="saving-detail-layout">
+    <aside class="saving-sidebar card">
+        <h2>#{{ saving_plan.plan_id }}</h2>
+        <div class="sidebar-meta">{{ saving_plan.saving_type.name }}</div>
 
-<a href="{% url 'manage_saving_accounts' %}" class="back-link">← Back to Saving Accounts</a>
+        <div class="badges">
+            {% if saving_plan.is_active %}
+            <span class="badge active">Active</span>
+            {% else %}
+            <span class="badge inactive">Inactive</span>
+            {% endif %}
+        </div>
 
-<div class="page-header">
-    <div>
-        <h1>Saving Account Details</h1>
-        <p>{{ saving_plan.account_number }} - {{ saving_plan.saving_type.name }}</p>
+        <div class="sidebar-stat">
+            <span>Balance</span>
+            <strong>{{ saving_plan.balance|floatformat:2 }}</strong>
+        </div>
+
+        <div class="sidebar-actions">
+            <a href="{% url 'manage_saving_plans' %}">Back to Saving Plans</a>
+        </div>
+    </aside>
+
+    <div class="saving-detail-content">
+        <section class="card">
+            <div class="section-header">
+                <h3>Customer Information</h3>
+            </div>
+
+            {% if saving_plan.customer %}
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <div class="detail-label">Full Name</div>
+                    <div class="detail-value">{{ saving_plan.customer.full_name }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Citizen ID</div>
+                    <div class="detail-value">{{ saving_plan.customer.citizen_id }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Email</div>
+                    <div class="detail-value">{{ saving_plan.customer.user.email }}</div>
+                </div>
+                <div class="detail-item detail-wide">
+                    <div class="detail-label">Address</div>
+                    <div class="detail-value">{{ saving_plan.customer.address }}</div>
+                </div>
+            </div>
+            {% else %}
+            <div class="empty-state">This saving plan is not linked to a customer.</div>
+            {% endif %}
+        </section>
+
+        <section class="card">
+            <div class="section-header">
+                <h3>Saving Plan Details</h3>
+            </div>
+
+            <div class="detail-grid">
+                <div class="detail-item">
+                    <div class="detail-label">Plan ID</div>
+                    <div class="detail-value">#{{ saving_plan.plan_id }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Saving Type</div>
+                    <div class="detail-value">{{ saving_plan.saving_type.name }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Interest Rate</div>
+                    <div class="detail-value">{{ saving_plan.interest_rate|floatformat:2 }}%</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Start Date</div>
+                    <div class="detail-value">{{ saving_plan.start_date|date:"Y-m-d" }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Maturity Date</div>
+                    <div class="detail-value">{{ saving_plan.maturity_date|date:"Y-m-d"|default:"Unlimited" }}</div>
+                </div>
+                <div class="detail-item">
+                    <div class="detail-label">Created</div>
+                    <div class="detail-value">{{ saving_plan.created_at|date:"Y-m-d H:i" }}</div>
+                </div>
+            </div>
+        </section>
+
+        <section class="card">
+            <div class="section-header">
+                <h3>Transactions</h3>
+            </div>
+
+            <table class="transactions-table">
+                <thead>
+                    <tr>
+                        <th>Transaction Type</th>
+                        <th>Amount</th>
+                        <th>Before</th>
+                        <th>After</th>
+                        <th>Time</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for transaction in transactions %}
+                    <tr>
+                        <td>
+                            <span class="badge {{ transaction.transaction_type|lower }}">
+                                {{ transaction.get_transaction_type_display }}
+                            </span>
+                        </td>
+                        <td>
+                            {% if transaction.transaction_type == "DEPOSIT" or transaction.transaction_type == "OPEN" %}
+                            <span class="amount-positive">+{{ transaction.amount|floatformat:2 }}</span>
+                            {% else %}
+                            <span class="amount-negative">-{{ transaction.amount|floatformat:2 }}</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ transaction.balance_before|floatformat:2 }}</td>
+                        <td>{{ transaction.balance_after|floatformat:2 }}</td>
+                        <td>{{ transaction.timestamp|date:"Y-m-d H:i" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="5" class="empty-state">
+                            No transactions found.
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </section>
     </div>
 </div>
-
-<section class="card">
-    <h2>Account Information</h2>
-
-    <div class="detail-grid">
-        <div class="detail-item">
-            <div class="detail-label">Account Number</div>
-            <div class="detail-value">{{ saving_plan.account_number }}</div>
-        </div>
-
-        <div class="detail-item">
-            <div class="detail-label">Saving Type</div>
-            <div class="detail-value">{{ saving_plan.saving_type.name }}</div>
-        </div>
-
-        <div class="detail-item">
-            <div class="detail-label">Balance</div>
-            <div class="detail-value balance-positive">{{ saving_plan.balance|floatformat:2 }}</div>
-        </div>
-
-        <div class="detail-item">
-            <div class="detail-label">Interest Rate</div>
-            <div class="detail-value interest-rate">{{ saving_plan.interest_rate|floatformat:2 }}%</div>
-        </div>
-
-        <div class="detail-item">
-            <div class="detail-label">Start Date</div>
-            <div class="detail-value">{{ saving_plan.start_date|date:"Y-m-d" }}</div>
-        </div>
-
-        <div class="detail-item">
-            <div class="detail-label">Maturity Date</div>
-            <div class="detail-value">{{ saving_plan.maturity_date|date:"Y-m-d"|default:"Unlimited" }}</div>
-        </div>
-
-        <div class="detail-item">
-            <div class="detail-label">Status</div>
-            <div class="detail-value">
-                {% if saving_plan.is_active %}
-                    <span style="color:#16a34a;">Active</span>
-                {% else %}
-                    <span style="color:#dc2626;">Inactive</span>
-                {% endif %}
-            </div>
-        </div>
-    </div>
-</section>
-
-{% if saving_plan.customer %}
-<section class="card">
-    <h2>Customer Information</h2>
-
-    <div class="detail-grid">
-        <div class="detail-item">
-            <div class="detail-label">Full Name</div>
-            <div class="detail-value">{{ saving_plan.customer.full_name }}</div>
-        </div>
-
-        <div class="detail-item">
-            <div class="detail-label">Citizen ID</div>
-            <div class="detail-value">{{ saving_plan.customer.citizen_id }}</div>
-        </div>
-
-        <div class="detail-item full-width">
-            <div class="detail-label">Address</div>
-            <div class="detail-value">{{ saving_plan.customer.address }}</div>
-        </div>
-    </div>
-</section>
-{% endif %}
-
-<section class="card">
-    <h2>Transactions</h2>
-
-    <table class="users-table">
-        <thead>
-        <tr>
-            <th>Type</th>
-            <th>Amount</th>
-            <th>Balance Before</th>
-            <th>Balance After</th>
-            <th>Time</th>
-        </tr>
-        </thead>
-
-        <tbody>
-        {% for t in transactions %}
-        <tr>
-            <td>
-                <span class="saving-type">
-                    {{ t.transaction_type }}
-                </span>
-            </td>
-
-            <td>
-                {% if t.transaction_type == "DEPOSIT" or t.transaction_type == "OPEN" %}
-                    <span style="color:#16a34a;">+{{ t.amount|floatformat:2 }}</span>
-                {% else %}
-                    <span style="color:#dc2626;">-{{ t.amount|floatformat:2 }}</span>
-                {% endif %}
-            </td>
-
-            <td>{{ t.balance_before|floatformat:2 }}</td>
-            <td>{{ t.balance_after|floatformat:2 }}</td>
-            <td>{{ t.timestamp|date:"Y-m-d H:i" }}</td>
-        </tr>
-        {% empty %}
-        <tr>
-            <td colspan="5" class="empty-state">
-                No transactions found.
-            </td>
-        </tr>
-        {% endfor %}
-        </tbody>
-    </table>
-</section>
-
 {% endblock %}
